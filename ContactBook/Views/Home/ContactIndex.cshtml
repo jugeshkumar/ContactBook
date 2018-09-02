@@ -1,0 +1,110 @@
+﻿@model IEnumerable<ContactBook.BusinessLayer.ViewModels.ContactViewModel>
+@{ViewBag.Title = "Index"; Layout = "~/Views/Shared/_Layout.cshtml";}
+
+<style>
+    input[type='number'] {
+        -moz-appearance: textfield;
+    }
+
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+    }
+</style>
+
+<div class="table-responsive">
+    <table id="ContactTable" class="table table-hover table-condensed">
+        <thead>
+            <tr>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>Gender</th>
+                <th>Mobile Number</th>
+                <th>Current City</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        @Html.HiddenFor(x => item.Id)
+                        @Html.DisplayFor(x => item.FirstName)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(x => item.LastName)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(x => item.Gender)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(x => item.MobileNumber)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(x => item.City)
+                    </td>
+                    <td>
+                        @Ajax.ActionLink("Edit", "ContactEdit", "Home", new { id = item.Id }, new AjaxOptions
+                                                                                            {
+                                                                                                HttpMethod = "Get",
+                                                                                                InsertionMode = InsertionMode.Replace,
+                                                                                                UpdateTargetId = "divContactEdit",
+                                                                                                OnComplete = "ShowContactEdit",
+                                                                                            }, new { @class = "btn btn-primary", @title = "Edit" })
+                        <button class="btn btn-danger" onclick="deleteContact(@item.Id)">Delete</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<div id="divContactAdd" class="modal fade" role="dialog">
+</div>
+
+<div id="divContactEdit" class="modal fade" role="dialog">
+</div>
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        $("#ContactTable").DataTable();
+
+        $("#ContactTable_filter").append('@Ajax.ActionLink("Add Contact", "ContactAdd", "Home", new AjaxOptions{HttpMethod = "Get",InsertionMode = InsertionMode.Replace,UpdateTargetId = "divContactAdd",OnComplete = "ShowContactAdd",}, new {@title = "Add Contact", @style = "float:right" , @class = "btn btn-primary addContact" })');
+
+        $('.addContact').prepend('<i class="fa fa-plus-circle"></i>');
+
+    });
+
+    function ShowContactAdd() {
+        $("#divContactAdd").modal('show');
+    }
+
+    function ShowContactEdit() {
+        $("#divContactEdit").modal('show');
+    }
+
+    function deleteContact(contactId) {
+        bootbox.confirm({
+            message: '<h4><span class = "text-danger"><b>Are you sure You want to delete this contact ?</b></span></h4>',
+            buttons: {
+                'cancel': {
+                    label: 'No',
+                    className: 'btn-default'
+                },
+                'confirm': {
+                    label: 'Yes',
+                    className: 'btn-danger'
+                }
+            },
+            callback: function (result) {
+                if (result) {
+                    window.location.href = "/Home/ContactDelete?contactId=" + contactId;
+                }
+            }
+        });
+    }
+
+</script>
